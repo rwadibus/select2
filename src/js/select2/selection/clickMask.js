@@ -12,7 +12,7 @@ define([
       '<div class="select2-close-mask"></div>'
     );
 
-    this.$mask.on('mousedown touchstart click', function () {
+    this.$mask.on('click', function (e) {
       self.trigger('close', {});
     });
   };

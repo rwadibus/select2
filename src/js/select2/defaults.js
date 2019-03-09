@@ -10,6 +10,7 @@ define([
   './selection/allowClear',
   './selection/search',
   './selection/eventRelay',
+  './selection/clickMask',
 
   './utils',
   './translation',
@@ -39,7 +40,7 @@ define([
              ResultsList,
 
              SingleSelection, MultipleSelection, Placeholder, AllowClear,
-             SelectionSearch, EventRelay,
+             SelectionSearch, EventRelay, ClickMask,
 
              Utils, Translation, DIACRITICS,
 
@@ -144,7 +145,7 @@ define([
 
     if (options.dropdownAdapter == null) {
       if (options.multiple) {
-        options.dropdownAdapter = Dropdown;
+        options.dropdownAdapter = Utils.Decorate(Dropdown, DropdownSearch);
       } else {
         var SearchableDropdown = Utils.Decorate(Dropdown, DropdownSearch);
 
@@ -206,12 +207,16 @@ define([
         );
       }
 
+      options.selectionAdapter = Utils.Decorate(options.selectionAdapter, ClickMask);
+
+      // Don't use SelectionSearch
+      /*
       if (options.multiple) {
         options.selectionAdapter = Utils.Decorate(
-          options.selectionAdapter,
-          SelectionSearch
+          options.selectionAdapter, SelectionSearch
         );
       }
+      */
 
       if (
         options.containerCssClass != null ||

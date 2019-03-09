@@ -30,6 +30,9 @@ define([
       self.trigger('toggle', {
         originalEvent: evt
       });
+      
+      // Prevent from closing when pressing an item in the list!
+      evt.stopPropagation();
     });
 
     this.$selection.on(
@@ -40,6 +43,9 @@ define([
         if (self.options.get('disabled')) {
           return;
         }
+
+        // Prevent from opening when pressing the DELETE button on a select item!
+        evt.stopPropagation();
 
         var $remove = $(this);
         var $selection = $remove.parent();

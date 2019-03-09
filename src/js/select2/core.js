@@ -274,12 +274,14 @@ define([
   Select2.prototype._registerEvents = function () {
     var self = this;
 
-    this.on('open', function () {
+    this.on('open', function (e) {
       self.$container.addClass('select2-container--open');
+      // $('body').addClass('select2-backdrop');
     });
 
     this.on('close', function () {
       self.$container.removeClass('select2-container--open');
+      // $('body').removeClass('select2-backdrop');
     });
 
     this.on('enable', function () {
@@ -440,7 +442,7 @@ define([
         return;
       }
     }
-
+    
     actualTrigger.call(this, name, args);
   };
 

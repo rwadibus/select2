@@ -47,9 +47,11 @@
     }
   }
 
-  .select2-results__option--highlighted[aria-selected] {
-    background-color: $results-choice-bg-hover-color;
-    color: $results-choice-fg-hover-color;
+  @media (min-width: 768px) { 
+    .select2-results__option--highlighted[aria-selected] {
+      background-color: $results-choice-bg-hover-color;
+      color: $results-choice-fg-hover-color;
+    }
   }
 
   .select2-results__group {

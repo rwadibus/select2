@@ -1,10 +1,7 @@
-define([
-  'jquery',
-  '../utils'
-], function ($, Utils) {
-  function Search () { }
+define(['jquery', '../utils'], function($, Utils) {
+  function Search() {}
 
-  Search.prototype.render = function (decorated) {
+  Search.prototype.render = function(decorated) {
     var $rendered = decorated.call(this);
 
     var $search = $(
@@ -12,7 +9,7 @@ define([
         '<input class="select2-search__field" type="search" tabindex="-1"' +
         ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
         ' spellcheck="false" role="textbox" />' +
-      '</span>'
+        '</span>'
     );
 
     this.$searchContainer = $search;
@@ -23,12 +20,12 @@ define([
     return $rendered;
   };
 
-  Search.prototype.bind = function (decorated, container, $container) {
+  Search.prototype.bind = function(decorated, container, $container) {
     var self = this;
 
     decorated.call(this, container, $container);
 
-    this.$search.on('keydown', function (evt) {
+    this.$search.on('keydown', function(evt) {
       self.trigger('keypress', evt);
 
       self._keyUpPrevented = evt.isDefaultPrevented();
@@ -37,38 +34,41 @@ define([
     // Workaround for browsers which do not support the `input` event
     // This will prevent double-triggering of events for browsers which support
     // both the `keyup` and `input` events.
-    this.$search.on('input', function (evt) {
+    this.$search.on('input', function(evt) {
       // Unbind the duplicated `keyup` event
       $(this).off('keyup');
     });
 
-    this.$search.on('keyup input', function (evt) {
+    this.$search.on('keyup input', function(evt) {
       self.handleSearch(evt);
     });
 
-    container.on('open', function () {
+    container.on('open', function() {
       self.$search.attr('tabindex', 0);
 
-      self.$search.focus();
-
-      window.setTimeout(function () {
+      // Only focus on desktop!
+      if (window.matchMedia('(min-width: 768px)').matches) {
         self.$search.focus();
-      }, 0);
+
+        window.setTimeout(function() {
+          self.$search.focus();
+        }, 0);
+      }
     });
 
-    container.on('close', function () {
+    container.on('close', function() {
       self.$search.attr('tabindex', -1);
 
       self.$search.val('');
     });
 
-    container.on('focus', function () {
+    container.on('focus', function() {
       if (container.isOpen()) {
         self.$search.focus();
       }
     });
 
-    container.on('results:all', function (params) {
+    container.on('results:all', function(params) {
       if (params.query.term == null || params.query.term === '') {
         var showSearch = self.showSearch(params);
 
@@ -81,7 +81,7 @@ define([
     });
   };
 
-  Search.prototype.handleSearch = function (evt) {
+  Search.prototype.handleSearch = function(evt) {
     if (!this._keyUpPrevented) {
       var input = this.$search.val();
 
@@ -93,7 +93,7 @@ define([
     this._keyUpPrevented = false;
   };
 
-  Search.prototype.showSearch = function (_, params) {
+  Search.prototype.showSearch = function(_, params) {
     return true;
   };
 

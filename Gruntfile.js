@@ -1,3 +1,5 @@
+const sass = require('node-sass');
+
 module.exports = function (grunt) {
   // Full list of files that must be included by RequireJS
   includes = [
@@ -211,7 +213,8 @@ module.exports = function (grunt) {
     sass: {
       dist: {
         options: {
-          outputStyle: 'compressed'
+          implementation: sass,
+          outputStyle: 'compressed',
         },
         files: {
           'dist/css/select2.min.css': [
@@ -222,6 +225,7 @@ module.exports = function (grunt) {
       },
       dev: {
         options: {
+          implementation: sass,
           outputStyle: 'nested'
         },
         files: {
@@ -346,7 +350,9 @@ module.exports = function (grunt) {
     'concat:dist', 'concat:dist.full',
     'sass:dev'
   ]);
-  grunt.registerTask('minify', ['uglify', 'sass:dist']);
+  grunt.registerTask('minify', ['uglify', 
+    'sass:dist'
+  ]);
   grunt.registerTask('test', ['connect:tests', 'qunit', 'jshint']);
 
   var ciTasks = [];

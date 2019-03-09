@@ -84,9 +84,11 @@
     }
   }
 
-  .select2-results__option--highlighted[aria-selected] {
-    background-color: #5897fb;
-    color: white;
+  @media (min-width: 768px) {
+    .select2-results__option--highlighted[aria-selected] {
+      background-color: #5897fb;
+      color: white;
+    }
   }
 
   .select2-results__group {
