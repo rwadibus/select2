@@ -1198,8 +1198,11 @@ S2.define('select2/results',[
       });
     }
 
-    this.$results.on('mouseup', '.select2-results__option[aria-selected]',
+    this.$results.on('click', '.select2-results__option[aria-selected]',
       function (evt) {
+
+      evt.stopPropagation();
+
       var $this = $(this);
 
       var data = $this.data('data');
@@ -1435,7 +1438,7 @@ S2.define('select2/selection/base',[
   BaseSelection.prototype._attachCloseHandler = function (container) {
     var self = this;
 
-    $(document.body).on('mousedown.select2.' + container.id, function (e) {
+    $(document.body).on('click.select2.' + container.id, function (e) {
       var $target = $(e.target);
 
       var $select = $target.closest('.select2');
@@ -1457,7 +1460,8 @@ S2.define('select2/selection/base',[
   };
 
   BaseSelection.prototype._detachCloseHandler = function (container) {
-    $(document.body).off('mousedown.select2.' + container.id);
+    $(document.body).off('click.select2.' + container.id);
+    $(document.body).off('touchstart.select2.' + container.id);
   };
 
   BaseSelection.prototype.position = function ($selection, $container) {
@@ -1513,11 +1517,15 @@ S2.define('select2/selection/single',[
     this.$selection.find('.select2-selection__rendered').attr('id', id);
     this.$selection.attr('aria-labelledby', id);
 
-    this.$selection.on('mousedown', function (evt) {
+    this.$selection.on('click', function (evt) {
+      evt.stopPropagation();
+
+      /*
       // Only respond to left clicks
       if (evt.which !== 1) {
         return;
       }
+      */
 
       self.trigger('toggle', {
         originalEvent: evt
@@ -1608,6 +1616,9 @@ S2.define('select2/selection/multiple',[
       self.trigger('toggle', {
         originalEvent: evt
       });
+      
+      // Prevent from closing when pressing an item in the list!
+      evt.stopPropagation();
     });
 
     this.$selection.on(
@@ -1618,6 +1629,9 @@ S2.define('select2/selection/multiple',[
         if (self.options.get('disabled')) {
           return;
         }
+
+        // Prevent from opening when pressing the DELETE button on a select item!
+        evt.stopPropagation();
 
         var $remove = $(this);
         var $selection = $remove.parent();
@@ -2101,6 +2115,36 @@ S2.define('select2/selection/eventRelay',[
   };
 
   return EventRelay;
+});
+
+S2.define('select2/selection/clickMask',[
+  'jquery'
+], function ($) {
+  function ClickMask () { }
+
+  ClickMask.prototype.bind = function (decorate, $container, container) {
+    var self = this;
+
+    decorate.call(this, $container, container);
+
+    this.$mask = $(
+      '<div class="select2-close-mask"></div>'
+    );
+
+    this.$mask.on('click', function (e) {
+      self.trigger('close', {});
+    });
+  };
+
+  ClickMask.prototype._attachCloseHandler = function (decorate, container) {
+    $(document.body).append(this.$mask);
+  };
+
+  ClickMask.prototype._detachCloseHandler = function (deocrate, container) {
+    this.$mask.detach();
+  };
+
+  return ClickMask;
 });
 
 S2.define('select2/translation',[
@@ -3886,13 +3930,10 @@ S2.define('select2/dropdown',[
   return Dropdown;
 });
 
-S2.define('select2/dropdown/search',[
-  'jquery',
-  '../utils'
-], function ($, Utils) {
-  function Search () { }
+S2.define('select2/dropdown/search',['jquery', '../utils'], function($, Utils) {
+  function Search() {}
 
-  Search.prototype.render = function (decorated) {
+  Search.prototype.render = function(decorated) {
     var $rendered = decorated.call(this);
 
     var $search = $(
@@ -3900,7 +3941,7 @@ S2.define('select2/dropdown/search',[
         '<input class="select2-search__field" type="search" tabindex="-1"' +
         ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
         ' spellcheck="false" role="textbox" />' +
-      '</span>'
+        '</span>'
     );
 
     this.$searchContainer = $search;
@@ -3911,12 +3952,12 @@ S2.define('select2/dropdown/search',[
     return $rendered;
   };
 
-  Search.prototype.bind = function (decorated, container, $container) {
+  Search.prototype.bind = function(decorated, container, $container) {
     var self = this;
 
     decorated.call(this, container, $container);
 
-    this.$search.on('keydown', function (evt) {
+    this.$search.on('keydown', function(evt) {
       self.trigger('keypress', evt);
 
       self._keyUpPrevented = evt.isDefaultPrevented();
@@ -3925,38 +3966,41 @@ S2.define('select2/dropdown/search',[
     // Workaround for browsers which do not support the `input` event
     // This will prevent double-triggering of events for browsers which support
     // both the `keyup` and `input` events.
-    this.$search.on('input', function (evt) {
+    this.$search.on('input', function(evt) {
       // Unbind the duplicated `keyup` event
       $(this).off('keyup');
     });
 
-    this.$search.on('keyup input', function (evt) {
+    this.$search.on('keyup input', function(evt) {
       self.handleSearch(evt);
     });
 
-    container.on('open', function () {
+    container.on('open', function() {
       self.$search.attr('tabindex', 0);
 
-      self.$search.focus();
-
-      window.setTimeout(function () {
+      // Only focus on desktop!
+      if (window.matchMedia('(min-width: 768px)').matches) {
         self.$search.focus();
-      }, 0);
+
+        window.setTimeout(function() {
+          self.$search.focus();
+        }, 0);
+      }
     });
 
-    container.on('close', function () {
+    container.on('close', function() {
       self.$search.attr('tabindex', -1);
 
       self.$search.val('');
     });
 
-    container.on('focus', function () {
+    container.on('focus', function() {
       if (container.isOpen()) {
         self.$search.focus();
       }
     });
 
-    container.on('results:all', function (params) {
+    container.on('results:all', function(params) {
       if (params.query.term == null || params.query.term === '') {
         var showSearch = self.showSearch(params);
 
@@ -3969,7 +4013,7 @@ S2.define('select2/dropdown/search',[
     });
   };
 
-  Search.prototype.handleSearch = function (evt) {
+  Search.prototype.handleSearch = function(evt) {
     if (!this._keyUpPrevented) {
       var input = this.$search.val();
 
@@ -3981,7 +4025,7 @@ S2.define('select2/dropdown/search',[
     this._keyUpPrevented = false;
   };
 
-  Search.prototype.showSearch = function (_, params) {
+  Search.prototype.showSearch = function(_, params) {
     return true;
   };
 
@@ -4528,6 +4572,7 @@ S2.define('select2/defaults',[
   './selection/allowClear',
   './selection/search',
   './selection/eventRelay',
+  './selection/clickMask',
 
   './utils',
   './translation',
@@ -4557,7 +4602,7 @@ S2.define('select2/defaults',[
              ResultsList,
 
              SingleSelection, MultipleSelection, Placeholder, AllowClear,
-             SelectionSearch, EventRelay,
+             SelectionSearch, EventRelay, ClickMask,
 
              Utils, Translation, DIACRITICS,
 
@@ -4662,7 +4707,7 @@ S2.define('select2/defaults',[
 
     if (options.dropdownAdapter == null) {
       if (options.multiple) {
-        options.dropdownAdapter = Dropdown;
+        options.dropdownAdapter = Utils.Decorate(Dropdown, DropdownSearch);
       } else {
         var SearchableDropdown = Utils.Decorate(Dropdown, DropdownSearch);
 
@@ -4724,12 +4769,16 @@ S2.define('select2/defaults',[
         );
       }
 
+      options.selectionAdapter = Utils.Decorate(options.selectionAdapter, ClickMask);
+
+      // Don't use SelectionSearch
+      /*
       if (options.multiple) {
         options.selectionAdapter = Utils.Decorate(
-          options.selectionAdapter,
-          SelectionSearch
+          options.selectionAdapter, SelectionSearch
         );
       }
+      */
 
       if (
         options.containerCssClass != null ||
@@ -5312,12 +5361,14 @@ S2.define('select2/core',[
   Select2.prototype._registerEvents = function () {
     var self = this;
 
-    this.on('open', function () {
+    this.on('open', function (e) {
       self.$container.addClass('select2-container--open');
+      // $('body').addClass('select2-backdrop');
     });
 
     this.on('close', function () {
       self.$container.removeClass('select2-container--open');
+      // $('body').removeClass('select2-backdrop');
     });
 
     this.on('enable', function () {
@@ -5478,7 +5529,7 @@ S2.define('select2/core',[
         return;
       }
     }
-
+    
     actualTrigger.call(this, name, args);
   };
 
