@@ -101,12 +101,13 @@
 @media (max-width: 767px) {
   /** Make select2 more mobile friendly */
   .select2-results {
-    height: 90% !important; }
+    height: 100% !important; }
   span.select2-search.select2-search--dropdown {
     background-color: #FFFFFF; }
   .select2-results__options {
     max-height: 100% !important;
     height: 100% !important;
+    padding-bottom: 60px !important;
     overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch !important; }
   .select2-results__options li.select2-results__option {
