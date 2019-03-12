@@ -144,7 +144,7 @@ define([
 
     if (options.dropdownAdapter == null) {
       if (options.multiple) {
-        options.dropdownAdapter = Dropdown;
+        options.dropdownAdapter = Utils.Decorate(Dropdown, DropdownSearch);
       } else {
         var SearchableDropdown = Utils.Decorate(Dropdown, DropdownSearch);
 
@@ -206,12 +206,14 @@ define([
         );
       }
 
+      /*
       if (options.multiple) {
         options.selectionAdapter = Utils.Decorate(
           options.selectionAdapter,
           SelectionSearch
         );
       }
+      */
 
       if (
         options.containerCssClass != null ||

@@ -2,16 +2,16 @@ define([
   'jquery',
   '../utils'
 ], function ($, Utils) {
-  function Search () { }
+  function Search() { }
 
   Search.prototype.render = function (decorated) {
     var $rendered = decorated.call(this);
 
     var $search = $(
       '<span class="select2-search select2-search--dropdown">' +
-        '<input class="select2-search__field" type="search" tabindex="-1"' +
-        ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
-        ' spellcheck="false" role="textbox" />' +
+      '<input class="select2-search__field" type="search" tabindex="-1"' +
+      ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
+      ' spellcheck="false" role="textbox" />' +
       '</span>'
     );
 
@@ -49,11 +49,13 @@ define([
     container.on('open', function () {
       self.$search.attr('tabindex', 0);
 
-      self.$search.focus();
-
-      window.setTimeout(function () {
+      if (window.matchMedia('(min-width: 768px)').matches) {
         self.$search.focus();
-      }, 0);
+
+        window.setTimeout(function () {
+          self.$search.focus();
+        }, 0);
+      }
     });
 
     container.on('close', function () {
@@ -64,7 +66,9 @@ define([
 
     container.on('focus', function () {
       if (container.isOpen()) {
-        self.$search.focus();
+        if (window.matchMedia('(min-width: 768px)').matches) {
+          self.$search.focus();
+        }
       }
     });
 
